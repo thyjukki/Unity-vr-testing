@@ -8,6 +8,7 @@ public class GunInspector : Editor {
     public override void OnInspectorGUI() {
         Gun_Base gun = (Gun_Base)target;
 
+        EditorGUILayout.LabelField("Gun Parts", EditorStyles.boldLabel);
         gun.slide = EditorGUILayout.ObjectField("Slide", gun.slide, typeof(Slide_Interactable), true) as Slide_Interactable;
         gun.magWell = EditorGUILayout.ObjectField("Magazine Well", gun.magWell, typeof(VRTK_SnapDropZone), true) as VRTK_SnapDropZone;
         gun.trigger = EditorGUILayout.ObjectField("Trigger", gun.trigger, typeof(Transform), true) as Transform;
@@ -17,12 +18,10 @@ public class GunInspector : Editor {
         gun.bulletPrefab = EditorGUILayout.ObjectField("Bullet Prefab", gun.bulletPrefab, typeof(GameObject), true) as GameObject;
         gun.shellPrefab = EditorGUILayout.ObjectField("Shell Prefab", gun.shellPrefab, typeof(GameObject), true) as GameObject;
 
+        EditorGUILayout.Space();
 
-
+        EditorGUILayout.LabelField("Gun Properties", EditorStyles.boldLabel);
         gun.fullAuto = EditorGUILayout.Toggle("Full auto", gun.fullAuto);
         gun.bulletSpeed = EditorGUILayout.FloatField("Bullet velocity", gun.bulletSpeed);
-
-
-
     }
 }
