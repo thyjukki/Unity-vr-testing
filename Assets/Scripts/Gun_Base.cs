@@ -1,23 +1,23 @@
 ﻿using System;
 using UnityEngine;
 using VRTK;
+using VRTK.GrabAttachMechanics;
+using VRTK.SecondaryControllerGrabActions;
 
-public class Gun_Interactable : VRTK_InteractableObject {
-    public float bulletSpeed = 250f;
+public class Gun_Base : VRTK_InteractableObject {
+    public float bulletSpeed;
 
     //private GameObject bullet;
     public Slide_Interactable slide;
-    public VRTK_SnapDropZone magazine;
+    public VRTK_SnapDropZone magWell;
     public bool fullAuto;
 
-    private Magazine_Interactable attachedMag;
+    protected Magazine_Interactable attachedMag;
 
     public Transform trigger;
 
-    public Vector3 triggerRestPos;
-
-    public Rigidbody slideRigidbody;
-    public Collider slideCollider;
+    protected Vector3 triggerRestPos;
+    
     public GameObject muzzle;
     public GameObject ejectionPort;
 
@@ -25,7 +25,7 @@ public class Gun_Interactable : VRTK_InteractableObject {
     public GameObject bulletPrefab;
     public GameObject shellPrefab;
 
-    private VRTK_ControllerEvents controllerEvents;
+    protected VRTK_ControllerEvents controllerEvents;
 
     private int chamberedRounds;
     public int ChamberedRounds {
@@ -103,7 +103,7 @@ public class Gun_Interactable : VRTK_InteractableObject {
     }
 
     public void LoadMagazine(Magazine_Interactable mag) {
-        magazine.ForceSnap(mag.gameObject);
+        magWell.ForceSnap(mag.gameObject);
         attachedMag = mag;
 
         Rigidbody magBody = mag.GetComponent<Rigidbody>();
@@ -118,7 +118,7 @@ public class Gun_Interactable : VRTK_InteractableObject {
     public void UnLoadMagazine() {
 
         if (attachedMag) {
-            magazine.ForceUnsnap();
+            magWell.ForceUnsnap();
 
             Rigidbody magBody = attachedMag.GetComponent<Rigidbody>();
             Collider magCol = attachedMag.GetComponent<Collider>();
@@ -155,9 +155,31 @@ public class Gun_Interactable : VRTK_InteractableObject {
 
     }
 
-    private void Start() {
-        magazine.ObjectEnteredSnapDropZone += OnObjectEnteredSnapDropZone;
+    protected virtual void Start() {
+        magWell.ObjectEnteredSnapDropZone += OnObjectEnteredSnapDropZone;
         triggerRestPos = trigger.localPosition;
+
+
+        //Set VRTK_InteractableObject values which will be same for all guns
+        disableWhenIdle = true;
+#if UNITY_EDITOR
+        touchHighlightColor = Color.red;//FIXME(Jukki) remove this
+#endif
+        allowedTouchControllers = AllowedController.Both;
+
+        isGrabbable = true;
+        holdButtonToGrab = false;
+        stayGrabbedOnTeleport = true;
+        validDrop = ValidDropTypes.Drop_Anywhere;
+        grabOverrideButton = VRTK_ControllerEvents.ButtonAlias.Grip_Press;
+        allowedGrabControllers = AllowedController.Both;
+        grabAttachMechanicScript = GetComponent<VRTK_ChildOfControllerGrabAttach>();
+        secondaryGrabActionScript = GetComponent<VRTK_SwapControllerGrabAction>();
+
+        isUsable = false;
+        holdButtonToUse = false;
+        pointerActivatesUseAction = false;
+
     }
 
     private void InputHandle() {

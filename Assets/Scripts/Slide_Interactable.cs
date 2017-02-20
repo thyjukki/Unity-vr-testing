@@ -11,7 +11,7 @@ public class Slide_Interactable : VRTK_InteractableObject {
     public float unchamberDistance;
     public float loadDistance;
 
-    public Gun_Interactable gun;
+    public Gun_Base gun;
 
     private bool unchambered;
     private bool loading;
