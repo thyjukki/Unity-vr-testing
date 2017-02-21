@@ -4,13 +4,14 @@ using VRTK;
 using VRTK.GrabAttachMechanics;
 using VRTK.SecondaryControllerGrabActions;
 
+
+[RequireComponent(typeof(VRTK_ChildOfControllerGrabAttach), typeof(VRTK_SwapControllerGrabAction))]
 public class Gun_Base : VRTK_InteractableObject {
     public float bulletSpeed;
 
     //private GameObject bullet;
     public Slide_Interactable slide;
     public VRTK_SnapDropZone magWell;
-    public bool fullAuto;
 
     protected Magazine_Interactable attachedMag;
 
@@ -25,19 +26,14 @@ public class Gun_Base : VRTK_InteractableObject {
     public GameObject bulletPrefab;
     public GameObject shellPrefab;
 
+
+    public bool fullAuto;
+    public bool magRelease;
+    public bool slideRelease;
+
     protected VRTK_ControllerEvents controllerEvents;
 
-    private int chamberedRounds;
-    public int ChamberedRounds {
-        get {
-            return chamberedRounds;
-        }
-        set {
-            chamberedRounds = value;
 
-            chamberedBullet.SetActive(chamberedRounds > 0);
-        }
-    }
 
     private bool fired;
 
@@ -49,9 +45,15 @@ public class Gun_Base : VRTK_InteractableObject {
             slide.isGrabbable = state;
     }
 
-    public bool SlideStopped {
-        get;
-        private set;
+    protected bool slideStopped;
+    public virtual bool SlideStopped {
+        get {
+            return slideStopped;
+        }
+
+        protected set {
+            slideStopped = value;
+        }
     }
 
     public override void Grabbed(GameObject currentGrabbingObject) {
@@ -72,20 +74,6 @@ public class Gun_Base : VRTK_InteractableObject {
             allowedUseControllers = AllowedController.Right_Only;
 
             slide.allowedGrabControllers = AllowedController.Left_Only;
-        }
-    }
-
-    public void Chamber() {
-
-        if (attachedMag && attachedMag.CurrentAmmo > 0) {
-            ChamberedRounds++;
-            attachedMag.CurrentAmmo--;
-        }
-    }
-
-    public void Unchamber() {
-        if (ChamberedRounds > 0) {
-            ChamberedRounds--;
         }
     }
 
@@ -112,7 +100,7 @@ public class Gun_Base : VRTK_InteractableObject {
         magBody.isKinematic = true;
         magCol.isTrigger = true;
 
-        mag.isGrabbable = false;
+        mag.isGrabbable = true;
     }
 
     public void UnLoadMagazine() {
@@ -182,7 +170,7 @@ public class Gun_Base : VRTK_InteractableObject {
 
     }
 
-    private void InputHandle() {
+    protected virtual void InputHandle() {
 
 
         if (controllerEvents) {
@@ -193,7 +181,9 @@ public class Gun_Base : VRTK_InteractableObject {
                 if (angle < 45 || angle > 315) {
                     SlideStopped = false;
                 } else if (angle < 225 && angle > 135) {
-                    UnLoadMagazine();
+                    if (magRelease) {
+                        UnLoadMagazine();
+                    }
                 }
             }
 
@@ -215,45 +205,35 @@ public class Gun_Base : VRTK_InteractableObject {
         base.Update();
 
 
-        //Update slidestop state
-        if (attachedMag && attachedMag.IsEmpty) {
-            SlideStopped = true;
-        } else if (SlideStopped) {
-            SlideStopped = slide.SlideLocked;
-        } else {
-            SlideStopped = false;
-        }
+        
 
         InputHandle();
     }
 
-    private void FireBullet() {
-        if (ChamberedRounds > 0 && slide.CanFire) {
-            ChamberedRounds--;
-            slide.Fire();
+    public virtual bool canFire { get { return true; } }
+
+    public virtual void FireBullet() {
+
+        GameObject bullet = Instantiate(bulletPrefab, muzzle.transform.position, muzzle.transform.rotation) as GameObject;
+
+        bullet.GetComponent<Bullet>().firedFrom = gameObject;
+
+        Rigidbody rb = bullet.GetComponent<Rigidbody>();
+        rb.AddForce(bullet.transform.forward * bulletSpeed);
 
 
-            GameObject bullet = Instantiate(bulletPrefab, muzzle.transform.position, muzzle.transform.rotation) as GameObject;
+        GameObject shell = Instantiate(shellPrefab, ejectionPort.transform.position, ejectionPort.transform.rotation) as GameObject;
 
-            bullet.GetComponent<Bullet>().firedFrom = gameObject;
+        Rigidbody shellRb = shell.GetComponent<Rigidbody>();
+        shellRb.AddForce(shell.transform.forward * 2 + shell.transform.right * 10 + shell.transform.up * 10);
 
-            Rigidbody rb = bullet.GetComponent<Rigidbody>();
-            rb.AddForce(bullet.transform.forward * bulletSpeed);
+        var colliders = GetComponentsInChildren<Collider>();
 
-
-            GameObject shell = Instantiate(shellPrefab, ejectionPort.transform.position, ejectionPort.transform.rotation) as GameObject;
-
-            Rigidbody shellRb = shell.GetComponent<Rigidbody>();
-            shellRb.AddForce(shell.transform.forward * 2 + shell.transform.right * 10 + shell.transform.up * 10);
-
-            var colliders = GetComponentsInChildren<Collider>();
-
-            foreach (var col in colliders) {
-                Physics.IgnoreCollision(shell.GetComponent<Collider>(), col);
-                Physics.IgnoreCollision(bullet.GetComponent<Collider>(), col);
-            }
-            Destroy(shell, 5f);
-            Destroy(bullet, 10f);
+        foreach (var col in colliders) {
+            Physics.IgnoreCollision(shell.GetComponent<Collider>(), col);
+            Physics.IgnoreCollision(bullet.GetComponent<Collider>(), col);
         }
+        Destroy(shell, 5f);
+        Destroy(bullet, 10f);
     }
 }

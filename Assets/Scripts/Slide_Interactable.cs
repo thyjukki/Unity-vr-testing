@@ -16,6 +16,12 @@ public class Slide_Interactable : VRTK_InteractableObject {
     private bool unchambered;
     private bool loading;
 
+    public float slidePos {
+        get {
+            return transform.localPosition.x - restPosition.x;
+        }
+    }
+
     public bool SlideLocked {
         get;
 
@@ -34,17 +40,16 @@ public class Slide_Interactable : VRTK_InteractableObject {
     protected override void LateUpdate() {
 
         base.LateUpdate();
-        float slidePos = transform.localPosition.x - restPosition.x;
         float newPos = transform.localPosition.x;
 
 
         // return slide back
         if (fireTimer <= 0 && slidePos > 0 && !IsGrabbed()) {
-
+            
             if (!(SlideLocked && gun.SlideStopped && slidePos == slideStop)) {
                 newPos = transform.localPosition.x - boltSpeed * Time.deltaTime;
-
-                if (slidePos > slideStop && (newPos - restPosition.x) <= slideStop && gun.SlideStopped) {
+                
+                if (slidePos >= slideStop && (newPos - restPosition.x) <= slideStop && gun.SlideStopped) {
                     newPos = restPosition.x + slideStop;
                     SlideLocked = true;
                 } else {
@@ -52,26 +57,6 @@ public class Slide_Interactable : VRTK_InteractableObject {
                 }
             }
         }
-
-
-
-        if (slidePos > unchamberDistance && !unchambered && IsGrabbed()) {
-            unchambered = true;
-            gun.Unchamber();
-        } else if (slidePos < unchamberDistance && unchambered) {
-            unchambered = false;
-        }
-
-
-
-        if (slidePos > loadDistance && !loading) {
-            loading = true;
-        } else if (slidePos < loadDistance && loading) {
-            loading = false;
-            gun.Chamber();
-        }
-
-
 
         //Fire
         if (fireTimer > 0) {
@@ -94,10 +79,10 @@ public class Slide_Interactable : VRTK_InteractableObject {
         if (slidePos < startLimit) {
             newPos = restPosition.x + startLimit;
         } else if (slidePos > travelDistance) {
-            newPos = travelDistance;
+            newPos = restPosition.x + travelDistance;
         }
 
-            transform.localPosition = new Vector3(newPos, restPosition.y, restPosition.z);
+        transform.localPosition = new Vector3(newPos, restPosition.y, restPosition.z);
 
     }
 

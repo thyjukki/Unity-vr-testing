@@ -10,6 +10,7 @@ public class Magazine_Interactable : VRTK_InteractableObject {
 
     [SerializeField]
     private int currentAmmo;
+
     public int CurrentAmmo {
         get {
             return currentAmmo;
@@ -32,6 +33,7 @@ public class Magazine_Interactable : VRTK_InteractableObject {
                 }
             }
         }
+
     }
 
     public List<GameObject> Bullets;

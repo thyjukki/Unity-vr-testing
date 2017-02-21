@@ -23,7 +23,6 @@ public class Bullet : MonoBehaviour {
         }
 
         else {
-            Debug.Log("We hit " + collision.gameObject.name);
         }
 
         Destroy(gameObject);

@@ -22,6 +22,8 @@ public class GunInspector : Editor {
 
         EditorGUILayout.LabelField("Gun Properties", EditorStyles.boldLabel);
         gun.fullAuto = EditorGUILayout.Toggle("Full auto", gun.fullAuto);
+        gun.magRelease = EditorGUILayout.Toggle("Magazine Release", gun.magRelease);
+        gun.slideRelease = EditorGUILayout.Toggle("Slide Release", gun.slideRelease);
         gun.bulletSpeed = EditorGUILayout.FloatField("Bullet velocity", gun.bulletSpeed);
     }
 }
