@@ -23,6 +23,10 @@ public class Bullet : MonoBehaviour {
         }
 
         else {
+
+            if (collision.gameObject.GetComponent<Soldier>()) {
+                collision.gameObject.GetComponent<Soldier>().Kill();
+            }
         }
 
         Destroy(gameObject);

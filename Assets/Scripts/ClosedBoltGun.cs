@@ -13,7 +13,9 @@ public class ClosedBoltGun : Gun_Base {
         set {
             chamberedRounds = value;
 
-            chamberedBullet.SetActive(chamberedRounds > 0);
+            if (chamberedBullet) {
+                chamberedBullet.SetActive(chamberedRounds > 0);
+            }
         }
     }
 

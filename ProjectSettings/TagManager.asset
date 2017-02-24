@@ -13,6 +13,7 @@ TagManager:
   - OtherSaucers
   - PistolMagazine
   - SmgMagazine
+  - AugMagazine
   layers:
   - Default
   - TransparentFX

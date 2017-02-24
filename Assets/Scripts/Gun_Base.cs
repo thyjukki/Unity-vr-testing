@@ -42,7 +42,8 @@ public class Gun_Base : VRTK_InteractableObject {
         if (!state) {
             slide.ForceStopInteracting();
         }
-            slide.isGrabbable = state;
+        slide.isGrabbable = state;
+        slide.enabled = true;
     }
 
     protected bool slideStopped;
@@ -149,7 +150,7 @@ public class Gun_Base : VRTK_InteractableObject {
 
 
         //Set VRTK_InteractableObject values which will be same for all guns
-        disableWhenIdle = true;
+        disableWhenIdle = false;
 #if UNITY_EDITOR
         touchHighlightColor = Color.red;//FIXME(Jukki) remove this
 #endif
